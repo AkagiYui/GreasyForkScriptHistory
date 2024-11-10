@@ -5,7 +5,7 @@ import pandas as pd
 import mplcyberpunk
 
 
-response = requests.get(url='https://greasyfork.org/zh-CN/scripts/473912-github%E6%90%9C%E7%B4%A2%E5%87%80%E5%8C%96/stats.json')
+response = requests.get(url='https://greasyfork.org/zh-CN/scripts/500519/stats.json')
 
 star_json = json.loads(response.text)
 
@@ -24,7 +24,7 @@ print(star_installs)
 plt.style.use("cyberpunk")
 plt.figure(figsize=(20, 10), dpi=100)
 plt.rcParams['font.sans-serif'] = ['HYWenHei'] # 用来正常显示中文标签SimHei
-plt.title("Github搜索净化", fontdict={'size': 30})
+plt.title("【哔哩哔哩】屏蔽视频PCDN地址", fontdict={'size': 30})
 plt.xlabel("时间", fontdict={'size': 30})
 plt.ylabel("总安装数（Greasy Fork）", fontdict={'size': 30})
 plt.xticks(fontsize=20)
