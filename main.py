@@ -1,10 +1,14 @@
 import json
 import requests
+import matplotlib
+matplotlib.use('Agg')  # 在导入 pyplot 之前设置后端为非交互式
 import matplotlib.pyplot as plt
 import pandas as pd
 import mplcyberpunk
 from pathlib import Path
 import matplotlib.font_manager as fm
+import concurrent.futures
+import os
 
 def get_script_info(script_id: str) -> tuple[str, dict[str, dict[str, int]]]:
     # 获取脚本基本信息
@@ -34,8 +38,9 @@ def plot_install_history(script_id: str, output_dir: Path) -> None:
     font_path = Path(__file__).parent / 'fonts' / 'HYWenHei.ttf'
     font = fm.FontProperties(fname=font_path)
 
+    # 创建新的图形对象
     plt.style.use("cyberpunk")
-    plt.figure(figsize=(20, 10), dpi=100)
+    fig = plt.figure(figsize=(20, 10), dpi=100)
     
     plt.title(script_name, fontproperties=font, size=30)
     plt.xlabel("时间", fontproperties=font, size=30)
@@ -47,7 +52,7 @@ def plot_install_history(script_id: str, output_dir: Path) -> None:
     # 保存到output目录，使用脚本ID作为文件名
     output_path = output_dir / f'history_{script_id}.png'
     plt.savefig(output_path)
-    plt.close()  # 关闭图表，避免内存泄漏
+    plt.close(fig)  # 明确关闭特定的图形对象
 
 def load_script_ids(config_file: str = 'script_ids.json') -> list[str]:
     """从配置文件加载脚本ID列表"""
@@ -66,6 +71,16 @@ def load_script_ids(config_file: str = 'script_ids.json') -> list[str]:
         print(f"配置文件 {config_file} 格式错误，请检查JSON格式")
         return []
 
+def process_script(args: tuple[str, Path]) -> None:
+    """处理单个脚本的函数，用于线程池"""
+    script_id, output_dir = args
+    try:
+        print(f"正在生成脚本 {script_id} 的安装历史图表...")
+        plot_install_history(script_id, output_dir)
+        print(f"脚本 {script_id} 的图表已生成")
+    except Exception as e:
+        print(f"生成脚本 {script_id} 的图表时出错: {str(e)}")
+
 def main() -> None:
     # 从配置文件加载脚本ID列表
     script_ids = load_script_ids()
@@ -78,14 +93,17 @@ def main() -> None:
     output_dir = Path(__file__).parent / 'output'
     output_dir.mkdir(exist_ok=True)
     
-    # 为每个脚本生成图表
-    for script_id in script_ids:
-        try:
-            print(f"正在生成脚本 {script_id} 的安装历史图表...")
-            plot_install_history(script_id, output_dir)
-            print(f"脚本 {script_id} 的图表已生成")
-        except Exception as e:
-            print(f"生成脚本 {script_id} 的图表时出错: {str(e)}")
+    # 获取CPU核心数，用于设置进程池大小
+    max_workers = os.cpu_count()
+    print(f"使用 {max_workers} 个进程进行并行处理")
+    
+    # 创建参数列表
+    args_list = [(script_id, output_dir) for script_id in script_ids]
+    
+    # 使用进程池并行处理
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        # 提交所有任务并等待完成
+        list(executor.map(process_script, args_list))
 
 if __name__ == "__main__":
     main()
