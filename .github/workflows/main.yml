@@ -13,27 +13,21 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.8
-
-    - name: Install fonts
-      run: |
-        mkdir -p ~/.fonts
-        cp fonts/* ~/.fonts/
-        fc-cache -f -v
+        python-version: '3.13'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests matplotlib pandas mplcyberpunk
+        pip install -r requirements.txt
 
     - name: Run script
       run: |
-        python ./source/main.py  # 替换为你的Python脚本文件名
+        python ./source/main.py
         tree -a
       
     - name: Commit and push if it changed
