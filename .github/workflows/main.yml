@@ -27,7 +27,7 @@ jobs:
 
     - name: Run script
       run: |
-        python ./source/main.py
+        python ./main.py
         tree -a
       
     - name: Commit and push if it changed

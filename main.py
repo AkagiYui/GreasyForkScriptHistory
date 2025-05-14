@@ -31,7 +31,7 @@ def plot_install_history(script_id):
         star_temp += stats_json[date]['installs']
         star_installs.append(star_temp)
     
-    font_path = Path(__file__).parent.parent / 'fonts' / 'HYWenHei.ttf'
+    font_path = Path(__file__).parent / 'fonts' / 'HYWenHei.ttf'
     font = fm.FontProperties(fname=font_path)
 
     plt.style.use("cyberpunk")
@@ -46,7 +46,6 @@ def plot_install_history(script_id):
     plt.plot(pd.to_datetime(star_date), star_installs, linewidth=4.0)
     plt.savefig('history.png')
 
-print(plt.style.available)
 if __name__ == "__main__":
     script_id = "500519"  # 可以根据需要修改脚本ID
     plot_install_history(script_id)
